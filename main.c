@@ -16,38 +16,13 @@ static float32_t testOutput[TEST_LENGTH_SAMPLES/2];
 
 // Example from: 
 // https://github.com/ARM-software/CMSIS/blob/master/CMSIS/DSP_Lib/Examples/arm_fft_bin_example/GCC/arm_fft_bin_data.c
-int fft_test() 
+void fft_test() 
 {
-    uint32_t fftSize = 1024;
-    uint32_t ifftFlag = 0;
-    uint32_t doBitReverse = 1;
+    const uint32_t fftSize = 1024;
+    const uint32_t ifftFlag = 0;
+    const uint32_t doBitReverse = 1;
 
-    /* Reference index at which max energy of bin ocuurs */
-    uint32_t refIndex = 213, testIndex = 0;
-
-    arm_status status;
-    float32_t maxValue;
-
-    status = ARM_MATH_SUCCESS;
-
-    /* Process the data through the CFFT/CIFFT module */
     arm_cfft_f32(&arm_cfft_sR_f32_len1024, testInput_f32_10khz, ifftFlag, doBitReverse);
-
-    /* Process the data through the Complex Magnitude Module for
-    calculating the magnitude at each bin */
-    arm_cmplx_mag_f32(testInput_f32_10khz, testOutput, fftSize);
-
-    /* Calculates maxValue and returns corresponding BIN value */
-    arm_max_f32(testOutput, fftSize, &maxValue, &testIndex);
-
-    if(testIndex !=  refIndex) {
-        status = ARM_MATH_TEST_FAILURE;
-    }
-
-    if( status != ARM_MATH_SUCCESS) {
-        while(1);   // Fail
-    }
-    return 0;
 }
 
 void toggle_leds()
@@ -57,6 +32,11 @@ void toggle_leds()
         bsp_board_led_invert(i);
         nrf_delay_ms(500);
     }
+}
+
+void toggle_test_led()
+{
+    bsp_board_led_invert(0);
 }
 
 void blink(int delay)
@@ -76,14 +56,15 @@ void blink(int delay)
 
 int main(void)
 {
-    const int blink_delay = 100;
-
+    const int test_samples = 1000;
     bsp_board_init(BSP_INIT_LEDS);
 
-    fft_test();
 
     while (true)
     {
-        blink(blink_delay);
+        toggle_test_led();
+        for (int i = 0; i < test_samples; i++) {
+            fft_test();
+        }
     }
 }
