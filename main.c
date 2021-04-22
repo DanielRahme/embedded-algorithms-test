@@ -5,17 +5,22 @@
 #include "boards.h"
 #include "cache.h"
 
-
 // FFT stuff
 #include "arm_math.h"
 #include "arm_const_structs.h"
-#define TEST_LENGTH_SAMPLES 2048
 
+#define RUN_FROM_RAM 1
+#define RUN_WITH_CACHE 0
+
+#define TEST_LENGTH_SAMPLES 2048
 extern float32_t testInput_f32_10khz[TEST_LENGTH_SAMPLES];
 static float32_t testOutput[TEST_LENGTH_SAMPLES/2];
 
 // Example from: 
 // https://github.com/ARM-software/CMSIS/blob/master/CMSIS/DSP_Lib/Examples/arm_fft_bin_example/GCC/arm_fft_bin_data.c
+#if (RUN_FROM_RAM)
+__attribute__ ((section(".fast")))  // Place the following function in RAM
+#endif
 void fft_test() 
 {
     const uint32_t fftSize = 1024;
@@ -56,6 +61,10 @@ void blink(int delay)
 
 int main(void)
 {
+    #if (RUN_WITH_CACHE)
+    cache_enable();
+    #endif
+
     const int test_samples = 1000;
     bsp_board_init(BSP_INIT_LEDS);
 
