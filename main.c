@@ -16,6 +16,7 @@
 extern float32_t testInput_f32_10khz[TEST_LENGTH_SAMPLES];
 static float32_t testOutput[TEST_LENGTH_SAMPLES/2];
 
+
 // Example from: 
 // https://github.com/ARM-software/CMSIS/blob/master/CMSIS/DSP_Lib/Examples/arm_fft_bin_example/GCC/arm_fft_bin_data.c
 #if (RUN_FROM_RAM)
@@ -44,20 +45,17 @@ void toggle_test_led()
     bsp_board_led_invert(0);
 }
 
-void blink(int delay)
+void blink_start_seq()
 {
-    // Leds on
-    for (int i = 0; i < LEDS_NUMBER; i++)
-        bsp_board_led_on(i);
-
-    nrf_delay_ms(delay);
-
-    // Leds off
-    for (int i = 0; i < LEDS_NUMBER; i++)
-        bsp_board_led_off(i);
-
-    nrf_delay_ms(delay);
+    const int delay = 250;
+    for (int i = 0; i < 3; i++) {
+        bsp_board_led_on(0);
+        nrf_delay_ms(delay);
+        bsp_board_led_off(0);
+        nrf_delay_ms(delay);
+    }
 }
+
 
 int main(void)
 {
@@ -68,10 +66,17 @@ int main(void)
     const int test_samples = 1000;
     bsp_board_init(BSP_INIT_LEDS);
 
+    // Start sequence
+    const int delay = 250;
+    for (int i = 0; i < 5; i++) {
+        bsp_board_led_invert(0);
+        nrf_delay_ms(delay);
+    }
+
 
     while (true)
     {
-        toggle_test_led();
+        bsp_board_led_invert(0);
         for (int i = 0; i < test_samples; i++) {
             fft_test();
         }
