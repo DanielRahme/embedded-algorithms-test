@@ -9,8 +9,7 @@
 #include "arm_math.h"
 #include "arm_const_structs.h"
 
-#define RUN_FROM_RAM 1
-#define RUN_WITH_CACHE 0
+#define RUN_FROM_RAM 0
 
 #define TEST_LENGTH_SAMPLES 2048
 extern float32_t testInput_f32_10khz[TEST_LENGTH_SAMPLES];
@@ -59,26 +58,42 @@ void blink_start_seq()
 
 int main(void)
 {
-    #if (RUN_WITH_CACHE)
-    cache_enable();
-    #endif
-
     const int test_samples = 1000;
     bsp_board_init(BSP_INIT_LEDS);
+    const int delay = 250;
 
     // Start sequence
-    const int delay = 250;
     for (int i = 0; i < 5; i++) {
         bsp_board_led_invert(0);
         nrf_delay_ms(delay);
     }
 
+    // Run FFT 1000 times
+    bsp_board_led_invert(0);
+    for (int i = 0; i < test_samples; i++) {
+        fft_test();
+    }
+
+
+    // Start sequence
+    for (int i = 0; i < 5; i++) {
+        bsp_board_led_invert(0);
+        nrf_delay_ms(delay);
+    }
+
+    // Enable cache
+    cache_enable();
+
+    // Run FFT with cache enabled
+    bsp_board_led_invert(0);
+    for (int i = 0; i < test_samples; i++) {
+        fft_test();
+    }
+
+    // End
+    bsp_board_led_invert(0);
 
     while (true)
     {
-        bsp_board_led_invert(0);
-        for (int i = 0; i < test_samples; i++) {
-            fft_test();
-        }
     }
 }
