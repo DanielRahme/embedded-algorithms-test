@@ -9,7 +9,7 @@
 #include "arm_math.h"
 #include "arm_const_structs.h"
 
-#define RUN_FROM_RAM 0
+#define RUN_FROM_RAM 1
 
 #define TEST_LENGTH_SAMPLES 2048
 extern float32_t testInput_f32_10khz[TEST_LENGTH_SAMPLES];
@@ -58,6 +58,21 @@ void blink_start_seq()
 
 int main(void)
 {
+#if (RUN_FROM_RAM)
+    // Section image located in flash 
+    extern const unsigned char __my_cmsis_dsp_load_start__[];
+    extern const unsigned char __my_cmsis_dsp_load_end__[];
+
+    // Where to locate the section image in RAM.
+    extern unsigned char __my_cmsis_dsp_start__[];
+    extern unsigned char __my_cmsis_dsp_end__[];
+
+    /* Copy image from flash to RAM. */
+    memcpy(__my_cmsis_dsp_start__,
+          __my_cmsis_dsp_load_start__,
+          __my_cmsis_dsp_end__ - __my_cmsis_dsp_start__);
+#endif
+
     const int test_samples = 1000;
     bsp_board_init(BSP_INIT_LEDS);
     const int delay = 250;
